@@ -1,0 +1,12 @@
+"Var1","Var2","DFr","DFt","psuedo.F","adjusted_p_values","p_values"
+"Northwestern Forested Mountains","Marine West Coast Forest",89,90,4.95731871235536,0.09,0.015
+"Tundra","Marine West Coast Forest",30,31,1.96395747542009,0.572,0.143
+"Taiga","Marine West Coast Forest",57,58,1.8239090854973,0.572,0.167
+"Northern Forests","Marine West Coast Forest",54,55,7.22545993282516,0.024,0.003
+"Tundra","Northwestern Forested Mountains",77,78,10.4486228091745,0.07,0.01
+"Taiga","Northwestern Forested Mountains",104,105,10.65100715174,0.01,0.001
+"Northern Forests","Northwestern Forested Mountains",101,102,20.145332657349,0.01,0.001
+"Taiga","Tundra",45,46,1.54353458664846,0.572,0.22
+"Northern Forests","Tundra",42,43,4.80448849681034,0.09,0.016
+"Northern Forests","Taiga",69,70,1.01671242440239,0.572,0.392
+"Glacial","Non-glacial",164,168,6.2683,NA,0.001
