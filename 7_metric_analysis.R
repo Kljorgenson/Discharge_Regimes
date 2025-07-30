@@ -60,9 +60,6 @@ ind <- get_pca_ind(PCA_1)
 inds <- as.data.frame(ind$coord)
 inds$name <- PCA_dat$name
 
-# Vartiable coordinates
-coords <- var$coord
-
 # View variance explained by PCs
 var.exp <- summary(PCA_1)$importance[2,]
 
@@ -71,6 +68,8 @@ var <- get_pca_var(PCA_1)
 var$contrib
 write.csv(var$contrib, 'Output_data/PCA_contrib.csv', row.names = F)
 
+# Variable coordinates
+coords <- var$coord
 
 # Join metric data and PCA data
 metric.dat <- full_join(metric.d, inds[,c(1,2,3,7)]) 

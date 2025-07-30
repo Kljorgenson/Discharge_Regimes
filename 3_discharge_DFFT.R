@@ -24,16 +24,16 @@ head(Qm_can)
 Q.m <- full_join(Qm, Qm_can) %>% filter(is.na(name) == F)
 Q.m <- Q.m %>% mutate(date = as.Date(date,format = "%Y-%m-%d")) 
 
-# Date ranges
-range <- Q.m %>% group_by(name, station) %>% summarise(start = min(date), end = max(date), length = (end-start)/365)
-max(range$start)
-min(range$end)
-
 # Trim date ranges
 Q.m <- Q.m %>% group_by(name) %>% filter(date >= "2000-01-01" & date <= "2022-12-31") %>%
   # Extra filtering to remove the start of the record for problem sites
   filter(date >= '2000-05-01' | name != 'MATANUSKA', date >= '2004-04-01' | name != 'MARGUERITE_2', date >= '2005-01-01' | name != 'GRASS RIVER ABOVE STANDING STONE FALLS')
 head(Q.m)
+
+# Date ranges
+range <- Q.m %>% group_by(name, station) %>% summarise(start = min(date), end = max(date), length = (end-start)/365)
+max(range$start)
+min(range$end)
 
 # Format data for 'discharge' package: Date (YYY-MM-DD) in column1, discharge in column 2
 Q.dat <- Q.m %>% dplyr::select(site = name, date, discharge)
@@ -193,14 +193,14 @@ head(Qm_can)
 Q.m <- full_join(Qm, Qm_can)
 Q.m <- Q.m %>% mutate(date = as.Date(date,format = "%Y-%m-%d"))
 
+# Select date range
+Q.m <- Q.m %>% group_by(name) %>% filter(date >= "1970-01-01" & date <= "1992-12-31")
+head(Q.m)
+
 # Range
 range <- Q.m %>% group_by(name) %>% summarise(start = min(date), end = max(date))
 max(range$start)
 min(range$end)
-
-# Select date range
-Q.m <- Q.m %>% group_by(name) %>% filter(date >= "1970-01-01" & date <= "1992-12-31")
-head(Q.m)
 
 # Format for discharge package
 Q.dat <- Q.m %>% dplyr::select(site = name, date, discharge)
