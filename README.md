@@ -4,4 +4,4 @@ Code for compiling and analyzing data for the paper 'Discharge regimes of  North
 
 R scripts 1-2 download and filter river discharge data from the U.S. Geoligical Survey and the Water Survey of Canada. 
 
-R scripts 4-5 download reanalysis climate data (ERA5) from the European Centre for Medium-Range Weather Forecasts. Dowloading and processing the ERA5 data takes multiple days. The processed monthly climate data is available in 'Output_data/All_ERA5_monthly_AK_CAN.csv'.
+R scripts 4-6 download reanalysis climate data (ERA5) from the European Centre for Medium-Range Weather Forecasts. Dowloading and processing the ERA5 data takes multiple days. The processed monthly climate data is available in 'Output_data/All_ERA5_monthly_AK_CAN.csv'.
