@@ -1,21 +1,15 @@
-### Explore relationships between flow regime metrics from anomaly claculation with catchment characteristics
+### Explore relationships between flow regime metrics from anomaly calculation with catchment characteristics
 
 library(tidyverse)
-library(tidyhydat)
 library(ggfortify)
 library(factoextra)
 library(ggforce)
 library(cowplot)
-library(ggExtra)
-library(grid)
-library(gridExtra)
 library(vegan)
-library(RVAideMemoire)
-library(emmeans)
 library(ggpubr)
-library(stats)
 library(nlme)
 library(emmeans)
+
 
 ### Read in metric data for recent period
 metric.data.20 <- read.csv("Output_data/Metrics_recent.csv") %>% select(name,seasonal,rms.signal,rms.noise,snr,sigma.hfb,start.date,end.date,HSAM,HSAM_t,peak,event.duration.h)
@@ -265,7 +259,6 @@ dat <- meta_full %>% select(station, name, ppt.20, ppt.60, rain.20, rain.60,snow
                              variable == 'snowmelt' ~ 'Snowmelt timing', variable == 'SI' ~ 'Rainfall Seasonality Index')) %>% select(-c(period2))
 dat
 
-dat %>% group_by(ecoregion, variable) %>% identify_outliers(value)
 
 ### Repeated measured ANOVA by ecoregion
 ## Rain
@@ -353,12 +346,14 @@ a <- dat3 %>% filter(!variable %in% c('Temperature', 'Precipitation', 'Snowmelt 
   xlab("") + ylab("Difference (%)") + labs(col = NULL) + scale_color_manual(values = cols, labels = function(x) str_wrap(x, width = 20)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 7), plot.margin = unit(c(0.1,0.2,0,0.5), 'cm')) +
   geom_point(size = 0.7, position = position_jitterdodge(jitter.width = 0.1), shape = 1)  + theme(legend.key.size = unit(0.6, 'cm'), legend.text=element_text(size=8)) +
-  geom_point(aes(x = 0.85,y=40), shape = 8, col = "#D95F02") + # Add asterisk for ecoregions with significant change between periods
+  geom_point(aes(x = 0.7,y=40), shape = 8, col = "#4E79A7") + # Add asterisk for ecoregions with significant change between periods
   geom_point(aes(x = 1,y=40), shape = 8, col = "#66A61E") +
-  geom_point(aes(x = 1.85,y=40), shape = 8, col = "#D95F02") +
+  geom_point(aes(x = 1.15,y=40), shape = 8, col = "#A6761D")+
+  geom_point(aes(x = 1.7,y=40), shape = 8, col = "#4E79A7") +
   geom_point(aes(x = 2,y=40), shape = 8, col = "#66A61E") +
-  geom_point(aes(x = 2.15,y=40), shape = 8, col = "#A6761D")+
-geom_point(aes(x = 3,y=40), shape = 8, col = "#66A61E")
+  geom_point(aes(x = 3,y=40), shape = 8, col = "#66A61E")+
+  geom_point(aes(x = 2.85,y=40), shape = 8, col = "#4E79A7")+
+geom_point(aes(x = 2.7,y=40), shape = 8, col = "#D95F02")
 a
 
 # Absolute difference for temperature
@@ -368,9 +363,10 @@ b <- dat3 %>% filter(variable == 'Temperature') %>% ggplot(aes(variable, diff, c
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 7), plot.margin = unit(c(0.1,0.3,0.65,0), 'cm')) +
   geom_point(size = 0.7, position = position_jitterdodge(jitter.width = 0.1), shape = 1) + ylim(-0.3,0.3) + scale_y_continuous(position = "left") + 
   theme(legend.key.size = unit(0.7, 'cm')) +
-  geom_point(aes(x = 0.85,y=0.2), shape = 8, col = "#D95F02") + # Add asterisk for ecoregions with significant change between periods
-  geom_point(aes(x = 1,y=0.2), shape = 8, col = "#66A61E") +
-  geom_point(aes(x = 1.15,y=0.2), shape = 8, col = "#A6761D")
+  geom_point(aes(x = 0.7,y=0.1), shape = 8, col = "#4E79A7") +
+  geom_point(aes(x = 0.85,y=0.1), shape = 8, col = "#D95F02") + # Add asterisk for ecoregions with significant change between periods
+  geom_point(aes(x = 1,y=0.1), shape = 8, col = "#66A61E") +
+  geom_point(aes(x = 1.15,y=0.1), shape = 8, col = "#A6761D")
 b
 
 # Absolute difference for snowmelt timing
@@ -380,10 +376,12 @@ c <- dat3 %>% filter(variable == 'Snowmelt timing') %>% ggplot(aes(str_wrap(vari
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), legend.text = element_text(size = 7), plot.margin = unit(c(0.1,0.3,0.3,0.1), 'cm')) +
   geom_point(size = 0.7, position = position_jitterdodge(jitter.width = 0.1), shape = 1) + ylim(-0.3,0.3) + scale_y_continuous(position = "left") + 
   theme(legend.key.size = unit(0.7, 'cm'))  +
-  geom_point(aes(x = 1,y=-15), shape = 8, col = "#66A61E") # Add asterisk for ecoregions with significant change between periods
+  geom_point(aes(x = 0.7,y=10), shape = 8, col = "#4E79A7") +
+  geom_point(aes(x = 1,y=10), shape = 8, col = "#66A61E") # Add asterisk for ecoregions with significant change between periods
 c
 
 # Combine plots
-ggarrange(a,c,b, widths = c(1,0.44,0.42), common.legend = T, legend = 'top', nrow = 1) 
+ggarrange(a,c,b, widths = c(1,0.44,0.43), common.legend = T, legend = 'top', nrow = 1) 
 
 ggsave("Figures/Figure_9.png", width = 6, height = 2.5, bg = "white")
+

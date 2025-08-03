@@ -2,11 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-Output_data/Q20_daily.csv
 Output_data/Q20_daily_can.csv
-Output_data/Q60_daily.csv
 Output_data/Q60_daily_can.csv
 Output_data/Precipitation_daily.csv
+Output_data/Snowfall_daily.csv
 Output_data/Snowmelt_daily.csv
 Output_data/All_USGS_Q.csv
-Output_data/All_ERA5_monthly_AK_CAN.csv

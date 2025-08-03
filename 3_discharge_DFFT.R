@@ -122,8 +122,9 @@ peak <- flow.dat %>% group_by(site) %>% filter(pred2==max(pred2)) %>% select(sit
   rename(peak = jday)
 
 # Select maximum annual anomaly (HSAM) and its timing
-SAM.sum <- full_join(flow.dat,peak) %>% filter(jday >= 60 & jday <= 304) %>% group_by(site, year)  %>% 
-  filter(resid.sig == max(resid.sig, na.rm = T)) %>% 
+SAM.sum <- full_join(flow.dat,peak) %>% filter(jday >= 60 & jday <= 304) %>% group_by(site, year)  %>%
+  filter(length(resid.sig) > 200) %>% # Remove years without full summer period
+  filter(resid.sig == max(resid.sig)) %>% 
   mutate(timing = jday-peak) %>% dplyr::select(date,year,jday,timing,resid.sig,peak)
 
 head(SAM.sum)
@@ -290,6 +291,7 @@ write.csv(metric.dat, "Output_data/DFFT_metrics_1970-1992_ak_can.csv", row.names
 ## High spectral anomaly magnitude (HSAM) and timing of HSAM during open water period (March-October)
 # Use peaks from recent period for reference for HSAM timing
 SAM.sum <- left_join(flow.dat,peak) %>% filter(jday >= 60 & jday <= 304) %>% group_by(site, year)  %>% 
+  filter(length(resid.sig) > 200) %>% # Remove years without full summer period
   filter(resid.sig == max(resid.sig, na.rm = T)) %>% 
   mutate(timing = jday-peak) %>% dplyr::select(site, date,year,jday,timing,resid.sig,peak)
 
