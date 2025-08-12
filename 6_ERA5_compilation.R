@@ -22,7 +22,9 @@ d0 <- rast(listfile[i])
 stations60 <- read.csv("Output_data/stations_historical.csv")%>% 
   select(station) %>% unique()
 
-shape.watershed <- st_read("Data/Watershed_export/All_watersheds_final_9.shp") %>% 
+shape.watershed1 <- st_read("Input_data/Watershed_export/All_watersheds_1.shp")
+shape.watershed2 <- st_read("Input_data/Watershed_export/All_watersheds_2.shp")
+shape.watershed <- rbind(shape.watershed1, shape.watershed2) %>% 
                   filter(StationNum %in% stations60$station) # For 1967-1998, only long-term stations
 
 # Fix invalid geometries
@@ -30,9 +32,6 @@ shape.watershed <- st_make_valid(shape.watershed)
 
 # Reproject to match raster CRS
 shape.watershed <- st_transform(shape.watershed, crs(d0))
-
-# Convert to terra SpatVector
-shape_vect <- vect(st_zm(shape.watershed)) # Drop z dimension
 
 Sys.time()
 temp = raster::extract(d0, shape.watershed, method="simple", fun=mean, 
