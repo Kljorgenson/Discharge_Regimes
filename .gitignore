@@ -8,3 +8,5 @@ Output_data/Precipitation_daily.csv
 Output_data/Snowfall_daily.csv
 Output_data/Snowmelt_daily.csv
 Output_data/All_USGS_Q.csv
+Input_data/Northern_region_shape/*
+Input_data/Watershed_export/*
