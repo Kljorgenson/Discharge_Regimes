@@ -1,4 +1,4 @@
-### Explore relationships between discharge regime metrics from anomaly calculation with catchment characteristics
+##### Calculate discharge regime metrics for the recent period (2000-2022) and their relationship with climate variables
 library(tidyverse)
 library(tidyhydat)
 library(ggfortify)
@@ -20,14 +20,12 @@ library(ggpubr)
 
 
 ##### Format all discharge regime metrics, climate variables, and catchment characteristics
-## Metadata/catchment characteristics
+### Metadata/catchment characteristics
 meta_full <- read.csv("Output_data/Metadata_AK_CAN.csv")
 
 ### Read in metric data
 metric.data <- read.csv("Output_data/DFFT_metrics_20yrs_ak_can.csv") %>%
   rename(name = site)
-
-head(metric.data)
 
 ## Take average of annual regime metrics (HSAM, HSAM timing, flood duration)
 # SAM annual -> average SAM over period
@@ -51,9 +49,11 @@ write.csv(metric.d, 'Output_data/Metrics_recent.csv')
 
 
 ##### Principal Component Aanalysis (PCA) on discharge regime metrics from DFFT
-# Select data and run PCA
+# Select data
 PCA_dat <- metric.d %>% dplyr::select(name, snr, rms.signal, sigma.hfb, HSAM, HSAM_t, event.duration.h, ecoregion1, glacial, permafrost_class)
-PCA_1 <- prcomp(PCA_dat[,c(2:7)],scale. = TRUE) # Run PCA
+
+# Run PCA
+PCA_1 <- prcomp(PCA_dat[,c(2:7)],scale. = TRUE) 
 
 # View PCA indices
 ind <- get_pca_ind(PCA_1)
@@ -63,7 +63,7 @@ inds$name <- PCA_dat$name
 # View variance explained by PCs
 var.exp <- summary(PCA_1)$importance[2,]
 
-# Export variable contribution
+# Export variable contributions
 var <- get_pca_var(PCA_1)
 var$contrib
 write.csv(var$contrib, 'Output_data/PCA_contrib.csv', row.names = F)
@@ -84,7 +84,6 @@ autoplot(PCA_1, data = PCA_dat, colour = 'glacial', loadings = TRUE, loadings.la
 ### PCA plots with rivers grouped by ecoregions
 # Ecoregion colors
 cols = c("#4E79A7", "#D95F02", "#66A61E", "#A6761D", "#F5C710")
-#colorblindcheck::palette_check(cols, plot = TRUE)
 
 ## Plot of PC1 vs PC2
 p1 <- metric.dat %>% filter(is.na(ecoregion1) == F) %>% ggplot(aes(Dim.1, Dim.2, colour = ecoregion1)) + theme_bw() +
@@ -231,15 +230,16 @@ ggsave("Figures/Figure S4.png", width = 7.2, height = 3.5)
 
 
 #### Catchment attribute plot
-
+# Select data
 dat <- metric.dat %>% filter(is.na(ecoregion1) == F) %>% dplyr::select(name, ecoregion1, latitude.c, longitude.c, area_km2, rain.20, snowfall.20,temp.20, snowmelt.t.20, SI.20) %>% pivot_longer(cols = 3:10, names_to = "variable")
 
-
+# Set theme
 themes <- theme_bw()  +
   theme(legend.margin = margin(l=0),legend.spacing.y = unit(100.0, 'cm'), legend.key.size = unit(0.5, 'cm'), legend.key.height = unit(1, 'cm'),
         axis.text.x = element_blank(), plot.margin = unit(c(0.1,0.1,0.1,0.1), "cm"), axis.ticks.x = element_blank(),
         axis.title.y = element_text(size = 10)) 
 
+# Pannels for each variable
 a <- dat %>% filter(variable == 'area_km2') %>% ggplot(aes(ecoregion1, value, col = ecoregion1)) + 
   geom_boxplot(outliers = F) + geom_jitter(size = 0.5) + 
   ylab(expression(Area~(km^{2}))) + xlab(NULL)+
@@ -286,8 +286,10 @@ h <- dat %>% filter(variable == 'SI.20') %>% ggplot(aes(ecoregion1, value, col =
   ylab("Rainfall Seasonality \n Index (Jun-Oct)") + xlab(NULL) +themes +
   scale_color_manual(name = "Ecoregion",values = cols, labels = function(x) str_wrap(x, width = 10))
 
-
+# Arrange pannels
 ggarrange(a,b,c,d,e,f,g,h, common.legend = T, widths = c(1,1,1.05,1), legend = 'top', ncol = 4, nrow = 2) + bgcolor("white") + border('white')   
+
+# Save plot
 ggsave("Figures/Figure_6.png", width = 7, height = 3)
 
 
@@ -308,7 +310,6 @@ metric.dat %>% ggplot() + geom_bar(aes(y = ecoregion1, fill = permafrost_class),
                      labels = scales::percent(c(0, 0.5, 1))) +
   geom_bar(aes(y = ecoregion1, col = glacial), position="fill", fill = NA, size = 1) +
   scale_color_manual(name = NULL, labels = c('Glacial', 'Non-glacial'), values = c(1, 'grey55'))
-  #geom_bar_pattern(aes(pattern = glacial), position="fill", pattern_spacing = 0.02, width = 0.5) + scale_pattern_manual(values = c('stripe', 'crosshatch'))
 
 ggsave("Figures/Figure_2.png", width = 4.5, height = 2.5)
 
@@ -380,12 +381,12 @@ write.csv(manova, "Output_data/Table_S2.csv", row.names = F)
 
 
 ### Linear regression to explore influence of climate variables on discharge regime metrics
-## Linear model of PC1
-mix1 <- lm(data = metric.dat, Dim.1 ~ glacial + scale(rain.20)*glacial + scale(snowfall.20)*glacial + scale(temp.20)*glacial + scale(area_km2_log)*glacial)
-mix_sum1 <- summary(mix1)
+# Center and scale climate variables
+metric.dat <- metric.dat %>% mutate(rain.z = (rain.20-mean(rain.20, na.rm = T))/sd(rain.20, na.rm = T), snowfall.z = (snowfall.20-mean(snowfall.20, na.rm = T))/sd(snowfall.20, na.rm = T), temp.z = (temp.20-mean(temp.20, na.rm = T))/sd(temp.20, na.rm = T), area.z = (area_km2_log-mean(area_km2_log, na.rm = T))/sd(area_km2_log, na.rm = T))
 
-# Check variance inflation
-vif(mix1, type = "predictor")
+## Linear model of PC1
+mix1 <- lm(data = metric.dat, Dim.1 ~ glacial + rain.z*glacial + snowfall.z*glacial + temp.z*glacial + area.z*glacial)
+mix_sum1 <- summary(mix1)
 
 ## Extract effect size and confidence intervals for plotting
 coefs <- mix_sum1$coefficients[,1]
@@ -397,10 +398,14 @@ coefs_var <- vcov(mix1)
 
 cnfnt <- confint(mix1)
 
+halfCI <- qt(0.975, dof) * sqrt(diag(coefs_var))
+matrix(c(coefs - halfCI, coefs + halfCI), ncol=2)
+
 # Confidence intervals for non-glacial
 # rain
 halfCI <- qt(0.975, dof) * sqrt(coefs_var[7,7]+coefs_var[3,3]+2*coefs_var[7,3])
 rain <- as.vector(c(coefs[7]+coefs[3]-halfCI, coefs[7]+coefs[3]+halfCI))
+rain
 
 # snowfall
 halfCI <- qt(0.975, dof) * sqrt(coefs_var[8,8]+coefs_var[4,4]+2*coefs_var[8,4])
@@ -413,18 +418,19 @@ temp <- as.vector(c(coefs[9]+coefs[5]-halfCI, coefs[9]+coefs[5]+halfCI))
 # area
 halfCI <- qt(0.975, dof) * sqrt(coefs_var[10,10]+coefs_var[6,6]+2*coefs_var[10,6])
 area <- as.vector(c(coefs[10]+coefs[6]-halfCI, coefs[10]+coefs[6]+halfCI))
+area
 
 cofs1 <- data.frame(glacial = c(rep("glacial", 4), rep("non-glacial", 4)), 
-                   term = c(rep(c("Rainfall", "Snowfall", "Temperature", "Area"), 2)),
-                   estimate = c(coefs[3:6], c(coefs[3:6] + coefs[7:10])),
-                   upperci = c(cnfnt[3:6,2], rain[2], snow[2], temp[2], area[2]),
-                   lowerci = c(cnfnt[3:6,1], rain[1], snow[1], temp[1], area[1]))
+                    term = c(rep(c("Rainfall", "Snowfall", "Temperature", "Area"), 2)),
+                    estimate = c(coefs[3:6], c(coefs[3:6] + coefs[7:10])),
+                    upperci = c(cnfnt[3:6,2], rain[2], snow[2], temp[2], area[2]),
+                    lowerci = c(cnfnt[3:6,1], rain[1], snow[1], temp[1], area[1]))
 
 cofs1
 cofs1$PC <- 'PC1'
 
 ## Linear model for PC2
-mix1 <- lm(data = metric.dat, Dim.2 ~ glacial + scale(rain.20)*glacial + scale(snowfall.20)*glacial + scale(temp.20)*glacial + scale(area_km2_log)*glacial)
+mix1 <- lm(data = metric.dat, Dim.2 ~ glacial + rain.z*glacial + snowfall.z*glacial + temp.z*glacial + area.z*glacial)
 mix_sum2 <- summary(mix1)
 
 ## Extract effect size and confidence intervals for plotting
@@ -465,7 +471,7 @@ cofs2$PC <- 'PC2'
 
 
 ## Linear model for HSAM timing
-mix1 <- lm(data = metric.dat, scale(HSAM_t) ~ glacial + scale(rain.20)*glacial + scale(snowfall.20)*glacial + scale(temp.20)*glacial + scale(area_km2_log)*glacial)
+mix1 <- lm(data = metric.dat, scale(HSAM_t) ~ glacial + rain.z*glacial + snowfall.z*glacial + temp.z*glacial + area.z*glacial)
 mix_sum3 <- summary(mix1)
 
 ## Emix1## Extract effect size and confidence intervals for plotting
@@ -539,7 +545,7 @@ p.efs <- cofs %>% ggplot(aes(estimate,term, shape = glacial, col = glacial))+
                     axis.text.y=element_text(angle=-45, hjust = 1, vjust = 1)) + facet_wrap(~PC, labeller = label_parsed) +
   scale_color_manual(values = c(1, 'grey55'), labels = c("Glacial", "Non-glacial")) +
   scale_shape_manual(name = NULL, values = c(17,16), labels = c("Glacial", "Non-glacial")) +
-  labs(col = NULL, shape = NULL) + xlim(-1.8,1.6) + xlab("Effect size") +scale_y_discrete(limits=rev)
+  labs(col = NULL, shape = NULL) + xlab("Effect size") +scale_y_discrete(limits=rev)
 p.efs
 
 ## PCA plots with rivers colored by scaled climate variable values
@@ -569,4 +575,5 @@ fig <- ggarrange(plt,p.efs, nrow = 2, heights = c(1.2,0.8))
 fig2 <- annotate_figure(fig, fig.lab = "\n      a)", fig.lab.pos = 'top.left', fig.lab.face = 'bold')
 annotate_figure(fig2, fig.lab = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\     b)", fig.lab.pos = 'top.left', fig.lab.face = 'bold')
 
+# Save plot
 ggsave("Figures/Figure_7.png", width = 4.8, height = 7.9)

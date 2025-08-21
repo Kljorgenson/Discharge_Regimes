@@ -1,4 +1,4 @@
-#### Discharge download - Canada
+### Download and sort all Water Survey of Canada discharge (m3/s) data
 library(tidyhydat)
 library(dplyr)
 library(ggplot2)
@@ -9,7 +9,7 @@ library(tidyr)
 library(readxl)
 library(tidyverse)
 
-### Download HYDAT database once
+### Download HYDAT database only once
 #download_hydat()
 
 ## All station metadata
@@ -17,12 +17,12 @@ stations <- hy_stations()
 
 
 
-######### Select rivers for historical period
+######### Discharge data available over long-term time period
 ## Starting list of all stations within study region
 stn_range <- hy_stn_data_range() %>% filter(DATA_TYPE == "Q") %>% filter(Year_to >= "2015", Year_from <= "1976")
 stations.60.all <- hy_stations() %>% filter(STATION_NUMBER %in% stn_range$STATION_NUMBER, LATITUDE > 51)
 
-# Clip to northern region
+# Clip to study region
 northern_region <- st_read("Input_data/Northern_region_shape/Northern_region.shp")
 stations.60.all <- st_as_sf(stations.60.all, coords = c("LONGITUDE","LATITUDE"), crs = "NAD83")
 stations.60.all <- st_transform(stations.60.all, crs = st_crs(northern_region))
@@ -70,14 +70,14 @@ Q.range <- q.60.ca %>% group_by(station, name_full) %>% summarise(start = min(da
 
 # Select potential data
 q.60 <- q.60.ca %>% filter(date >= "1967-01-01", ) %>%
-  filter(date >= '1970-03-15' | !station %in% c('07BF002', '07HA003'),
+  filter(date >= '1970-03-15' | !station %in% c('07BF002', '07HA003'), # Trim data for stations with bad data just at the beginning
          date >= '1972-01-01' | !station == '06BD001',
          date >= '1972-09-01' | !station == '09BC004',
          date >= '1970-09-17' | !station == '08DA005',
          date > '1972-08-29' | !station == '06BA002',
          date > '1968-09-29' | !station == '05UF004',
-         date > '1976-05-26' | !station == '06DA005') # Trim data for stations with bad data just at the beginning
-names(q.60)
+         date > '1976-05-26' | !station == '06DA005') 
+
 
 # Add missing river names
 q.60[q.60$station == "10NC001", 7] <- "ANDERSON RIVER BELOW CARNWATH RIVER"
@@ -147,7 +147,7 @@ write.csv(q_60, "Output_data/Q60_daily_can.csv", row.names = F)
 
 
                 
-############ All sites for recent period
+############ All sites for recent period (2000-2022)
 ## Stations with recent ~20 years
 stn_range2 <- hy_stn_data_range() %>% filter(DATA_TYPE == "Q") %>% filter(Year_to >= "2010", Year_from <= "2007", RECORD_LENGTH >= 10)
 stn_range2

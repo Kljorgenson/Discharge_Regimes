@@ -1,5 +1,4 @@
 ### Explore relationships between flow regime metrics from anomaly calculation with catchment characteristics
-
 library(tidyverse)
 library(ggfortify)
 library(factoextra)

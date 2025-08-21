@@ -5,6 +5,9 @@ library(tidyverse)
 library(tidyhydat)
 library(ggplot2)
 
+
+
+########### Combine all hourly data for each variable and calculate daily and monthly averages
 # Combine files for each year 
 filelist = list.files(path = "Output_data/", pattern = "*snowmelt*", # Adjust variable name
                       full.names = TRUE, recursive = T)
@@ -80,9 +83,7 @@ write.csv(covs.day, "Output_data/Snowmelt_daily.csv", row.names = F)
 
 
 
-################################################################
-
-#### Combine monthly data for all climate variables
+########### Combine monthly data for all climate variables
 filelist = list.files(path = "Output_data/", pattern = "*monthly*", full.names = TRUE)
 filelist
 
@@ -111,5 +112,5 @@ covs.mo <- covrs %>% unique() %>%
 # Add date
 covs.mo$date <- as.Date(paste(covs.mo$year, covs.mo$month, "15", sep = "-"), format = '%Y-%m-%d')
 
-# Export
+# Export all combined monthly climate data
 write.csv(co.mo, "Output_data/All_ERA5_monthly_AK_CAN.csv", row.names = F)
