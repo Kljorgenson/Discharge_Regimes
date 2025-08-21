@@ -251,7 +251,8 @@ write.csv(stats, "Output_data/PERMANOVA_periods.csv", row.names= F)
 dat <- meta_full %>% select(station, name, ppt.20, ppt.60, rain.20, rain.60,snowfall.20,snowfall.60,temp.20,temp.60,SI.20,SI.60,snowmelt.t.20,snowmelt.t.60,ecoregion1) %>% pivot_longer(cols = 3:14, names_to = "variable") %>% 
   separate(col = variable, into = c('variable', 'period', 'period2')) %>% 
   mutate(period = ifelse(is.na(period2),period,period2)) %>%
-    mutate(period = case_when(period == 20 ~ '2000-2023', period == 60 ~ '1970-1992')) %>%
+    mutate(period = case_when(period == 20 ~ '2000-2023', period == 60 ~ '1970-1992'),
+           period = factor(period, levels = c('2000-2023', '1970-1992'))) %>%
   filter(is.na(value) == F) %>% group_by(name,variable) %>% filter(length(name) == 2) %>% 
   mutate(variable = case_when(variable == 'rain' ~ "Rain", variable == 'snowfall' ~ 'Snowfall',
                              variable == 'temp' ~ "Temperature", variable == 'ppt' ~ 'Precipitation',
@@ -324,7 +325,7 @@ stats <- full_join(rain.pairs,snowfall.pairs) %>% full_join(temp.pairs) %>% full
   mutate(variable = c(rep('Rain', 5),rep('Snowfall', 5),rep('Temperature', 5),rep('Snowfall timing', 5),rep('Rainfall Seasonality Index', 5)))
 
 
-write.csv(stats, "Output_data/Resuts_periods_climate.csv", row.names= F)
+write.csv(stats, "Output_data/Table_S4.csv", row.names= F)
 
 
 
