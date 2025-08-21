@@ -237,7 +237,7 @@ stats <- full_join(tot, p.e) %>% full_join(p.p) %>% full_join(p.g)
 stats$F <- c(ad1$F[1], ad4$F[1],ad5$F[1],ad6$F[1],ad7$F[1],ad8$F[1],ad9$F[1],ad10$F[1],ad11$F[1], ad2$F[1],ad3$F[1])
 stats$DFr <- c(ad1$Df[2], ad4$Df[2],ad5$Df[2],ad6$Df[2],ad7$Df[2],ad8$Df[2],ad9$Df[2],ad10$Df[2],ad11$Df[2], ad2$Df[2],ad3$Df[2])
 stats$DFt <- c(ad1$Df[3], ad4$Df[3],ad5$Df[3],ad6$Df[3],ad7$Df[3],ad8$Df[3],ad9$Df[3],ad10$Df[3],ad11$Df[3], ad2$Df[3],ad3$Df[3])
-write.csv(stats, "Output_data/PERMANOVA_periods.csv", row.names= F)
+write.csv(stats, "Output_data/Table_S3.csv", row.names= F)
 
 
 
