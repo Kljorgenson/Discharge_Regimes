@@ -193,7 +193,7 @@ dat %>% ggplot(aes(ecoregion1, value, col = ecoregion1)) +
    theme(strip.background =element_rect(fill="white"), legend.margin = margin(l=0),legend.spacing.y = unit(100.0, 'cm'), legend.key.size = unit(0.5, 'cm'), legend.key.height = unit(1, 'cm'),
          axis.text.x = element_blank())+ scale_color_manual(name = "Ecoregion",values = cols, labels = function(x) str_wrap(x, width = 10))
 
-ggsave("Figures/Figure_6.png", width = 6.8, height = 3.5)
+ggsave("Figures/Figure_4.png", width = 6.8, height = 3.5)
 
 # Boxplots of metrics by glacial vs non-glacial
 dat2 <- metric.dat %>% dplyr::select(glacial, ecoregion1, sigma.hfb, snr, HSAM, HSAM_t, rms.signal, event.duration.h) %>% pivot_longer(cols = 3:8, names_to = "variable")
@@ -267,7 +267,7 @@ d<- dat %>% filter(variable == 'temp.20') %>% ggplot(aes(ecoregion1, value, col 
 
 e<- dat %>% filter(variable == 'rain.20') %>% ggplot(aes(ecoregion1, value, col = ecoregion1)) + 
   geom_boxplot(outliers = F) + geom_jitter(size = 0.5) + 
-  ylab('Rain (mm)') + xlab(NULL) +themes +
+  ylab('Rainfall (mm)') + xlab(NULL) +themes +
   scale_color_manual(name = "Ecoregion",values = cols, labels = function(x) str_wrap(x, width = 10))
 
 f<- dat %>% filter(variable == 'snowfall.20') %>% ggplot(aes(ecoregion1, value, col = ecoregion1)) + 

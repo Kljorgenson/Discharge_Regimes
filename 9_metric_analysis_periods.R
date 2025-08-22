@@ -254,7 +254,7 @@ dat <- meta_full %>% select(station, name, ppt.20, ppt.60, rain.20, rain.60,snow
     mutate(period = case_when(period == 20 ~ '2000-2023', period == 60 ~ '1970-1992'),
            period = factor(period, levels = c('2000-2023', '1970-1992'))) %>%
   filter(is.na(value) == F) %>% group_by(name,variable) %>% filter(length(name) == 2) %>% 
-  mutate(variable = case_when(variable == 'rain' ~ "Rain", variable == 'snowfall' ~ 'Snowfall',
+  mutate(variable = case_when(variable == 'rain' ~ "Rainfall", variable == 'snowfall' ~ 'Snowfall',
                              variable == 'temp' ~ "Temperature", variable == 'ppt' ~ 'Precipitation',
                              variable == 'snowmelt' ~ 'Snowmelt timing', variable == 'SI' ~ 'Rainfall Seasonality Index')) %>% select(-c(period2))
 dat
@@ -262,7 +262,7 @@ dat
 
 ### Repeated measured ANOVA by ecoregion
 ## Rain
-d1 <- dat %>% filter(variable == 'Rain') %>% arrange(period)
+d1 <- dat %>% filter(variable == 'Rainfall') %>% arrange(period)
 lme_rain <- lme(value ~ ecoregion1 * period,
                   random = ~1 | name,
                   data = d1)
@@ -322,7 +322,7 @@ SI.pairs <- summary(pairs(SI.p), infer = c(TRUE, TRUE))
 
 ### Stat output dataframe
 stats <- full_join(rain.pairs,snowfall.pairs) %>% full_join(temp.pairs) %>% full_join(snow_t.pairs) %>% full_join(SI.pairs) %>% as.data.frame() %>%
-  mutate(variable = c(rep('Rain', 5),rep('Snowfall', 5),rep('Temperature', 5),rep('Snowfall timing', 5),rep('Rainfall Seasonality Index', 5)))
+  mutate(variable = c(rep('Rainfall', 5),rep('Snowfall', 5),rep('Temperature', 5),rep('Snowfall timing', 5),rep('Rainfall Seasonality Index', 5)))
 
 
 write.csv(stats, "Output_data/Table_S4.csv", row.names= F)
@@ -344,7 +344,7 @@ cols = c("#4E79A7", "#D95F02", "#66A61E", "#A6761D", "#F5C710")
 ## Plot
 # % difference for Rain, Snowfall, and rainfall seasonality
 a <- dat3 %>% filter(!variable %in% c('Temperature', 'Precipitation', 'Snowmelt timing')) %>% 
-  mutate(variable2 = factor(variable, levels = c('Rain', 'Snowfall', 'Rainfall Seasonality Index'), labels = c(c('Rain', 'Snowfall', 'Rainfall Seasonality Index (Jun-Oct)'))),
+  mutate(variable2 = factor(variable, levels = c('Rainfall', 'Snowfall', 'Rainfall Seasonality Index'), labels = c(c('Rainfall', 'Snowfall', 'Rainfall Seasonality Index (Jun-Oct)'))),
          variable2 = fct_relabel(variable2, ~str_wrap(.x, width = 15))) %>%
   ggplot(aes(variable2, diff.p, col = ecoregion1))+
   geom_hline(yintercept = 0, linetype = 2, col = 'grey') + geom_boxplot(outliers = F) + theme_bw() +
