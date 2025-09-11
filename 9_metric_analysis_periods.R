@@ -357,7 +357,7 @@ a <- dat3 %>% filter(!variable %in% c('Temperature', 'Precipitation', 'Snowmelt 
   geom_point(aes(x = 1.7,y=40), shape = 8, col = "#4E79A7") +
   geom_point(aes(x = 2,y=40), shape = 8, col = "#66A61E") +
   geom_point(aes(x = 3,y=40), shape = 8, col = "#66A61E")+
-  geom_point(aes(x = 2.85,y=40), shape = 8, col = "#D95F02")+
+  geom_point(aes(x = 3.15,y=40), shape = 8, col = "#A6761D")+
 geom_point(aes(x = 2.7,y=40), shape = 8, col = "#4E79A7")
 a
 

@@ -117,20 +117,16 @@ rain <- full_join(precip, snow, by = c('station', 'year', 'month', 'jday')) %>%
 head(rain)
 
 
-rain %>% filter(station == "07EC003") %>% mutate(date = as.Date(jday - 1, origin = paste0(year, "-01-01"))) %>% 
-  ggplot(aes(date, station, col = is.na(rain))) + geom_point()
-
-snow %>% filter(station == "07EC003") %>% mutate(date = as.Date(jday - 1, origin = paste0(year, "-01-01"))) %>% 
-  ggplot(aes(date, station, col = is.na(value))) + geom_point()
 
 # Clip data to date range and calculate seasonality index
 si <- rain %>% filter(year >= '1970' & year <= '2020') %>% filter(year <= '1992' | year >= '2000') %>% 
   filter(jday >= 152 & jday <= 304) %>% # June-Oct
   mutate(period = ifelse(year > '1992', 'SI.20', 'SI.60')) %>% # Assign period
-  group_by(station,year) %>% mutate(sum = sum(rain)) %>% mutate(si.part = 1/sum*abs(rain-(sum/(304-151)))) %>%
+  group_by(station,year) %>% mutate(tot = sum(rain)) %>% mutate(si.part = abs(rain-(tot/(304-151)))) %>%
+  group_by(station,year, period) %>% summarise(SI = 1/tot*(sum(si.part))) %>%
   full_join(range) %>%
   filter(ifelse(period == 'SI.20', year >= start.20 & year <= end.20, year >= start.60 & year <= end.60)) %>%
-  group_by(station, period) %>% summarise(SI = sum(si.part)) %>%
+  group_by(station, period) %>% summarise(SI = mean(SI)) %>%
   pivot_wider(values_from = SI, names_from = period)
 head(si)
 
