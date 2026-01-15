@@ -9,7 +9,7 @@ library(ggplot2)
 
 ########### Combine all hourly data for each variable and calculate daily and monthly averages
 # Combine files for each year 
-filelist = list.files(path = "Output_data/", pattern = "*snowmelt*", # Adjust variable name
+filelist = list.files(path = "C:/Users/kljorgenson/Documents/Repos/AK_discharge_data/ERA5/Processed/Region/", pattern = "*ppt*", # Adjust variable name
                       full.names = TRUE, recursive = T)
 df_list <- lapply(filelist, read.csv) 
 names(df_list) <- basename( filelist )
@@ -18,7 +18,7 @@ df_list_named <- map2(df_list, names(df_list), ~mutate(.x, source = .y))
 
 # Make all columns characters
 df_list_named <- lapply(df_list_named, function(x) {x[] <- lapply(x, as.character); x})
-cov.raw <- df_list_named %>% reduce(full_join)
+cov.raw <- df_list_named %>% reduce(full_join) %>% filter(is.na(value) == F)
 
 # Extract variable from file name
 cov.raw$variable <- substr(cov.raw$source, start = 6, stop = 200)
@@ -37,7 +37,7 @@ covs.hr <- covs.hrly
 # Based on timezone of discharge data
 
 # Match stations and UTC-X
-meta.ak <- read.csv("Data/river_metadata.csv") %>% filter(NameNom == "") %>% 
+meta.ak <- read.csv("Input_data/river_metadata.csv") %>% filter(NameNom == "") %>% 
   rename(station = StationNum) %>%
   dplyr::select(station) %>% unique()
 meta.ak$UTC_minus <- 9 # All Alaska stations in same time zone
@@ -71,14 +71,14 @@ covs.mo <- covs.hr %>% group_by(station, year, month, variable) %>%
   filter(n > 600) %>% dplyr::select(-c(n)) 
 
 # Export monthly data
-write.csv(covs.mo, "Output_data/Snowmelt_monthly.csv", row.names = F)
+write.csv(covs.mo, "Output_data/Precipitation_monthly.csv", row.names = F)
 
-# Daily
+# Export daily
 covs.day <- covs.hr %>% mutate(jday = yday(datetime_adj)) %>% group_by(station, year, month, jday, variable) %>%
   summarise(n = length(variable), value = if_else(first(variable) %in% c("temp", "temm", "temm-add.csv", "temm.nc-ad.csv"), mean(value), sum(value))) %>% 
   filter(n == 24) %>% dplyr::select(-c(n))
 
-write.csv(covs.day, "Output_data/Snowmelt_daily.csv", row.names = F)
+write.csv(covs.day, "Output_data/Precipitation_daily.csv", row.names = F)
 
 
 
@@ -113,4 +113,5 @@ covs.mo <- covrs %>% unique() %>%
 covs.mo$date <- as.Date(paste(covs.mo$year, covs.mo$month, "15", sep = "-"), format = '%Y-%m-%d')
 
 # Export all combined monthly climate data
-write.csv(co.mo, "Output_data/All_ERA5_monthly_AK_CAN.csv", row.names = F)
+write.csv(covs.mo, "Output_data/All_ERA5_monthly_AK_CAN.csv", row.names = F)
+

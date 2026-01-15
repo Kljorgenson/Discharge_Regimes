@@ -315,6 +315,7 @@ lme_SI <- lme(value ~ ecoregion1 * period,
                   random = ~1 | name,
                   data = d5)
 anova(lme_SI)
+
 # Comparison between periods within ecoregions
 SI.p <- emmeans(lme_SI, ~ period | ecoregion1)
 SI.pairs <- summary(pairs(SI.p), infer = c(TRUE, TRUE))

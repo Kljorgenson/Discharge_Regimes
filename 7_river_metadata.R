@@ -42,7 +42,7 @@ tail(met)
 
 ### Broad permafrost groupings
 # Percent of catchment area in each permafrost category from spatial analysis in ArcGIS
-perm <- read.csv("Input_data/Permafrost_percent.csv") %>% dplyr::select(StationNum, EXTENT, AREA, PERCENTAGE)
+perm <- read.csv("Input_data/Permafrost_percent_Obu.csv") %>% dplyr::select(StationNum, EXTENT, AREA, PERCENTAGE)
 names(perm) <- c("station", "permafrost_class", "permafrost_area", "permafrost_percent")
 
 # Add an 'Unfrozen' category for catchments without any unfrozen area, and assign the area to zero
@@ -54,6 +54,7 @@ non.perm$permafrost_area <- 0
 
 # Assign the permafrost category that covers the largest area within the catchment
 perm <- full_join(perm, non.perm) %>% group_by(station) %>% filter(permafrost_percent == max(permafrost_percent)) %>%
+  mutate(permafrost_class = ifelse(permafrost_class == 'Unfrozen', 'Unfrozen', substr(permafrost_class, start = 1, stop = 1))) %>%
   mutate(across(permafrost_class, ~ifelse(permafrost_class == "I", "S", .))) # Combine I and S classes
 
 

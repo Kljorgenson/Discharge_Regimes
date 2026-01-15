@@ -220,11 +220,11 @@ dat %>% ggplot(aes(permafrost_class, value, col = permafrost_class)) +
   ylab(NULL) + theme_bw() + xlab(NULL) +
   theme(strip.background =element_rect(fill="white"), axis.ticks.x=element_blank(), text=element_text(size=13),legend.text=element_text(size=8.9),
         axis.text.y = element_text(size = 8),plot.margin = unit(c(0.5,0.7,0.2,0.5), "cm"),
-        axis.text.x = element_blank()) + scale_colour_manual(name = NULL,values = cols.p, labels = c("Continuous (n = 16)", "Discontinuous (n = 50)", "Sporadic (n = 73)", "Unfrozen (n = 33)")) +
+        axis.text.x = element_blank()) + scale_colour_manual(name = NULL,values = cols.p, labels = c("Continuous (n = 27)", "Discontinuous (n = 30)", "Sporadic (n = 54)", "Unfrozen (n = 61)")) +
   theme(strip.background =element_rect(fill="white"), legend.margin = margin(l=0),legend.spacing.y = unit(100.0, 'cm'), legend.key.size = unit(0.5, 'cm'), legend.key.height = unit(1, 'cm'),
         axis.text.x = element_blank())
 
-ggsave("Figures/Figure S4.png", width = 7.2, height = 3.5)
+ggsave("Figures/Figure S4.png", width = 7.3, height = 3.5)
 
 
 
@@ -372,9 +372,46 @@ anosim.pairwise.ecoregion1 <- cbind( vars, DFr, DFt, psuedo.F, adjusted_p_values
 anosim.pairwise.ecoregion1
 
 
+
+## Pairwise comparison of permafrost categories
+dat2 <- metric.dat %>% dplyr::select(permafrost_class, Dim.1, Dim.2) %>% na.omit()
+
+# List of all pairwise comparisons
+vars <- expand.grid(unique(dat2$permafrost_class), unique(dat2$permafrost_class)) %>% filter(Var1 != Var2)
+vars <- vars %>% filter(duplicated(t(apply(vars, 1, sort))) == F)
+
+# Loop through pairwise ecoregion comparisons
+p_values.p <- c() 
+psuedo.F.p <- c()
+DFr.p <- c()
+DFt.p <- c()
+
+for(i in 1:nrow(vars)){
+  var <- vars[i,]
+  dat2 <- metric.dat %>% dplyr::select(permafrost_class, Dim.1, Dim.2, Dim.3) %>% na.omit() %>% filter(permafrost_class %in% c(var$Var1, var$Var2))
+  pairwise_anosim <- adonis2(dat2[,2:3]~dat2$permafrost_class, method = "euc")
+  # Save the p-value
+  p_values.p <- c(p_values.p, pairwise_anosim$`Pr(>F)`[1])
+  psuedo.F.p <- c(psuedo.F.p, pairwise_anosim$`F`[1])
+  DFr.p <- c(DFr.p, pairwise_anosim$Df[2])
+  DFt.p <- c(DFt.p, pairwise_anosim$Df[3])
+}
+
+# Adjust for multiple comparisons using the Holms method
+adjusted_p_values.p <- p.adjust(p_values.p, method = "holm")
+
+anosim.pairwise.permafrost <- cbind( vars, DFr.p, DFt.p, psuedo.F.p, adjusted_p_values.p, p_values.p)
+names(anosim.pairwise.permafrost) <- names(anosim.pairwise.ecoregion1)
+anosim.pairwise.permafrost
+
+
+
+
+
+
 ## Export all PERMANOVA results
 glac <- data.frame(Var1 = 'Glacial', Var2 = 'Non-glacial', p_values = 0.001, psuedo.F = 6.2683, DFr=164, DFt = 168)
-manova <- full_join(anosim.pairwise.ecoregion1, glac)
+manova <- full_join(anosim.pairwise.ecoregion1, glac) %>% full_join(anosim.pairwise.permafrost)
 write.csv(manova, "Output_data/Table_S2.csv", row.names = F)
 
 

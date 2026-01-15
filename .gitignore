@@ -7,4 +7,9 @@ Output_data/Q60_daily_can.csv
 Output_data/Precipitation_daily.csv
 Output_data/Snowfall_daily.csv
 Output_data/Snowmelt_daily.csv
+Output_data/Temperature_daily.csv
+Output_data/Precipitation_monthly.csv
+Output_data/Snowfall_monthly.csv
+Output_data/Snowmelt_monthly.csv
+Output_data/Temperature_monthly.csv
 Output_data/All_USGS_Q.csv
