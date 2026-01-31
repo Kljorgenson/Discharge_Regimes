@@ -1,0 +1,11 @@
+"Brown","Obu","n"
+"Continuous","Continuous",12
+"Continuous","Discontinuous",1
+"Discontinuous","Continuous",13
+"Discontinuous","Discontinuous",13
+"Discontinuous","Sporadic/Isolated",15
+"Sporadic/Isolated","Discontinuous",10
+"Sporadic/Isolated","Sporadic/Isolated",30
+"Sporadic/Isolated","Unfrozen",27
+"Unfrozen","Sporadic/Isolated",3
+"Unfrozen","Unfrozen",17

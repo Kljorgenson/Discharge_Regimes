@@ -179,9 +179,48 @@ meta_full <- left_join(meta_full, nicknames)
 
 # Only keep metadata for rivers selected for final analysis
 meta_final <- meta_full %>% 
-  filter(name %in% range.20$name) 
+  filter(station %in% range.20$station) 
 
 ### Save river metadata
 write.csv(meta_final, "Output_data/Metadata_AK_CAN.csv", row.names = F)
 
+
+
+### Table comparing Obu (2019) and Brown (2002) permafrost extent estimates
+Brown <- read.csv("Input_data/Permafrost_percent_Brown.csv") %>% dplyr::select(StationNum, EXTENT, AREA, PERCENTAGE)
+names(Brown) <- c("station", "permafrost_class", "permafrost_area", "permafrost_percent")
+
+# Add an 'Unfrozen' category for catchments without any unfrozen area, and assign the area to zero
+non.Brown <- Brown %>% group_by(station) %>% filter(sum(permafrost_percent) < 100) %>% 
+  summarise(permafrost_percent = 100-sum(permafrost_percent))
+
+non.Brown$permafrost_class <- "Unfrozen"
+non.Brown$permafrost_area <- 0
+
+# Assign the permafrost category that covers the largest area within the catchment
+Brown <- full_join(Brown, non.Brown) %>% group_by(station) %>% filter(permafrost_percent == max(permafrost_percent)) %>%
+  mutate(permafrost_class = ifelse(permafrost_class == 'Unfrozen', 'Unfrozen', substr(permafrost_class, start = 1, stop = 1))) %>%
+  mutate(across(permafrost_class, ~ifelse(permafrost_class == "I", "S", .))) # Combine I and S classes
+
+Brown$source = 'Brown'
+perm$source = 'Obu'
+
+
+## Figure comparing Brown and Obu permafrost datasets
+cols.p <- rev(c("lightgoldenrod3", "#7FCDBB", "#1D91C0", "#0C2C84"))
+full_join(perm, Brown) %>% mutate(permafrost_class = ifelse(is.na(permafrost_class), 'Unfrozen',permafrost_class)) %>%
+  select(station, source, permafrost_class) %>%
+  mutate(source = ifelse(source == 'Brown', 'Brown et al. (2002)', 'Obu et al. (2019)')) %>%
+  filter(station %in% range.20$station) %>% full_join(meta_final[,c(1,27,28)]) %>% filter(station != 15225997, is.na(source) == F) %>%
+  ggplot() + geom_bar(aes(y = ecoregion1, fill = permafrost_class), position="fill") + theme_bw() + ylab("") + xlab("") +
+  facet_wrap(~source) +
+  scale_fill_manual(name = "Permafrost extent",values = cols.p, labels = c("Continuous", "Discontinuous", "Sporadic/Isolated", "Unfrozen")) +
+  theme(strip.background =element_rect(fill="white"),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        axis.text.x = element_text(size = 8)) +
+  scale_y_discrete(labels = ~str_wrap(.x, 15)) +
+  scale_x_continuous(name = "",
+                     breaks = c(0, 0.5, 1), 
+                     labels = scales::percent(c(0, 0.5, 1)))
+
+ggsave('Figures/Figure_S1.png', width = 6, height = 2.8)
 
