@@ -1,10 +1,10 @@
-## Compile and clip ERA5 climate data
+## Download ERA5 climate data
 library(ecmwfr)
 
 
 #### Import ERA5 monthly data from CDS
-# Region except NL: c(73, -169, 48, -79)
-# NL: c(57, -64, 54, -61)
+# Bounds for region except NL: c(73, -169, 48, -79)
+# Bounds for NL: c(57, -64, 54, -61)
 
 wf_set_key(key = ) # Enter key obtained from cds.climate.copernicus.eu
 

@@ -316,4 +316,5 @@ df.list <- lapply(sites, event.func)
 event.dat <- rbindlist(df.list)
 head(event.dat)
 
+# Export flood duration
 write.csv(event.dat, "Output_data/events_1970-1992.csv", row.names = F)

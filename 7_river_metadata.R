@@ -42,20 +42,15 @@ tail(met)
 
 ### Broad permafrost groupings
 # Percent of catchment area in each permafrost category from spatial analysis in ArcGIS
-perm <- read.csv("Input_data/Permafrost_percent_Obu.csv") %>% dplyr::select(StationNum, EXTENT, AREA, PERCENTAGE)
-names(perm) <- c("station", "permafrost_class", "permafrost_area", "permafrost_percent")
+perm <- read.csv("Input_data/Zonal_permafrost_Obu.csv") %>% dplyr::select(StationNum, MEAN, MEDIAN)
+names(perm) <- c("station", "permafrost_mean", "permafrost_median")
 
-# Add an 'Unfrozen' category for catchments without any unfrozen area, and assign the area to zero
-non.perm <- perm %>% group_by(station) %>% filter(sum(permafrost_percent) < 100) %>% 
-  summarise(permafrost_percent = 100-sum(permafrost_percent))
-
-non.perm$permafrost_class <- "Unfrozen"
-non.perm$permafrost_area <- 0
-
-# Assign the permafrost category that covers the largest area within the catchment
-perm <- full_join(perm, non.perm) %>% group_by(station) %>% filter(permafrost_percent == max(permafrost_percent)) %>%
-  mutate(permafrost_class = ifelse(permafrost_class == 'Unfrozen', 'Unfrozen', substr(permafrost_class, start = 1, stop = 1))) %>%
-  mutate(across(permafrost_class, ~ifelse(permafrost_class == "I", "S", .))) # Combine I and S classes
+# Assign permafrost categories
+perm <- perm %>% mutate(permafrost_class = case_when(permafrost_mean == 0 ~ 'Unfrozen',
+                                                     permafrost_mean > 0 & permafrost_mean < .1 ~ 'I',
+                                                     permafrost_mean >= 0.1 & permafrost_mean < .5 ~ 'S',
+                                                     permafrost_mean >= 0.5 & permafrost_mean < 0.9 ~ 'D',
+                                                     permafrost_mean > 0.9 ~ 'C'))
 
 
 ### Glacier area from spatial analysis in ArcGIS
@@ -90,7 +85,7 @@ covs.an.20 <- read.csv("Output_data/All_ERA5_monthly_AK_CAN.csv") %>%
   filter(n == 12) %>% dplyr::select(-c(n)) %>% summarise(ppt.20 = mean(ppt, na.rm = T),rain.20 = mean(rain, na.rm = T),snowfall.20 = mean(snowfall, na.rm = T),temp.20 = mean(temp, na.rm = T),snowmelt.20 = mean(snowmelt, na.rm = T))
 
 
-any(is.na(covs.an.60$ppt.60))
+
 
 ### Calculate snowmelt timing and precipitation seasonality index
 ## Precipitation seasonality index for June-October
@@ -166,8 +161,6 @@ meta_full <- full_join(meta1, eco.largest) %>% filter(is.na(ecoregion1) == F)
 # Replace NA with zero for glacier area and add unfrozen values for permafrost class
 meta_full$glacier_area_km2 <- ifelse(is.na(meta_full$glacier_area_km2), 0, meta_full$glacier_area_km2)
 meta_full$glacier_percent <- ifelse(is.na(meta_full$glacier_percent), 0, meta_full$glacier_percent)
-meta_full$permafrost_class <- ifelse(is.na(meta_full$permafrost_class), "Unfrozen", meta_full$permafrost_class)
-meta_full$permafrost_percent <- ifelse(is.na(meta_full$permafrost_percent), 100, meta_full$permafrost_percent)
 
 # Classify as a glacial river if glacier % cover >= 1%
 meta_full$glacial <- ifelse(meta_full$glacier_percent < 1, "non-glacial", "glacial")
@@ -183,6 +176,8 @@ meta_final <- meta_full %>%
 
 ### Save river metadata
 write.csv(meta_final, "Output_data/Metadata_AK_CAN.csv", row.names = F)
+
+
 
 
 
@@ -208,7 +203,8 @@ perm$source = 'Obu'
 
 ## Figure comparing Brown and Obu permafrost datasets
 cols.p <- rev(c("lightgoldenrod3", "#7FCDBB", "#1D91C0", "#0C2C84"))
-full_join(perm, Brown) %>% mutate(permafrost_class = ifelse(is.na(permafrost_class), 'Unfrozen',permafrost_class)) %>%
+full_join(perm, Brown) %>% mutate(permafrost_class = ifelse(is.na(permafrost_class), 'Unfrozen',permafrost_class),
+                                  permafrost_class= ifelse(permafrost_class == "I", "S",permafrost_class)) %>% # Combine I and S classes
   select(station, source, permafrost_class) %>%
   mutate(source = ifelse(source == 'Brown', 'Brown et al. (2002)', 'Obu et al. (2019)')) %>%
   filter(station %in% range.20$station) %>% full_join(meta_final[,c(1,27,28)]) %>% filter(station != 15225997, is.na(source) == F) %>%

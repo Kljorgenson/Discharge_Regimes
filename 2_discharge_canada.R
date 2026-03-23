@@ -268,5 +268,6 @@ q_20.1 <- left_join(q_20, stats)
 # Check range
 q_20.1 %>% group_by(station) %>% summarise(start = min(date), end = max(date)) %>% View()
 
+# Export
 write.csv(q_20.1, "Output_data/Q20_daily_can.csv")
 

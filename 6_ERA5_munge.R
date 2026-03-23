@@ -1,4 +1,4 @@
-#### Covariate organization
+#### Organization climate data
 # Compile data from .csv file output from clipping ERA5 data to watersheds
 # Some parts of code must be adjusted for different climate variables
 library(tidyverse)

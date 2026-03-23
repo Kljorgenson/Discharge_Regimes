@@ -1,5 +1,5 @@
 ## Compile and clip ERA5 climate data
-# Some parts of code must be adjusted for each different variable
+# Some parts of this code must be adjusted for each different climate variable
 library(ncdf4)
 library(raster) # package for raster manipulation
 library(sf) # package for geospatial analysis
@@ -12,6 +12,7 @@ library(data.table)
 listfile <- list.files(path="Output_data/", pattern="Era5-temp-*", full.names = TRUE)
 listfile 
 
+## Loop through raster files to clip climate data to each watershed
 for(i in 1:length(listfile)){
 ## Covert to raster stack
 d0 <- rast(listfile[i])
